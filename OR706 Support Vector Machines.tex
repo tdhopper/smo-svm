@@ -1,0 +1,205 @@
+\documentclass[10pt]{article}
+\usepackage{../../mycommands}
+\usepackage{graphicx,wrapfig,listings,fancyhdr, bibentry}
+\usepackage[all,dvips,arc,curve,color,frame]{xy}
+\pagestyle{fancy}
+% \usepackage[top=1.1in, bottom=1.0in, left=1.5in, right=1.5in]{geometry}
+\doublespacing
+\fancyhead[LO,LE]{T. Hopper}
+\fancyhead[CO,CE]{Support Vector Machines}
+\fancyfoot[CO,CE]{}
+\fancyhead[RO, LE] {\thepage}
+
+
+\renewcommand{\proofname}{Solution}
+ \renewcommand{\labelenumi}{(\alph{enumi})}
+\lstset{language=Mathematica}
+
+
+\begin{document}
+ % \unfinished
+
+% \noindent OR 706 \hfill Support Vector Machines \hfill Tim Hopper
+
+Support Vector Machines (SVMs) are statistical machine learning algorithms used, among other applications, to as a binary classifier. Classification algorithms such as the SVM, logistic regression, classification trees, linear discriminate analysis, and neural networks, ``learns'' to distinguish between classes of points in $\R^{n}$ given historic training data. 
+
+\subsection{Maximal Margin Separating Hyperplane} % (fold)
+\label{ssub:maximal_margin_separating_hyperplane}
+
+% subsubsection maximal_margin_separating_hyperplane (end)
+For motivation, consider the two classes of points in $\R^{2}$ in Figure \ref{fig:sep_plot_2}. Note that there are infinitely many lines that could be drawn to separate the red from the green points. Any such line can be described by the equation
+\begin{equation}
+	f(x)=\beta^{T} x+\beta_{0}=0
+\end{equation}
+for some $\beta\in \R^{2}$, $\beta_{0}\in \R$, and $x\in \R^{2}$. Simple geometric arguments show that for the green points $x$, $f(x)<0$; likewise, for any red point $f(x)>0$. 
+
+\begin{figure}[htb]
+				\begin{center}
+				\includegraphics[width=300px]{Project/sep_plot_2.pdf}
+				\caption{Linearly separable data}
+					\label{fig:sep_plot_2}
+				\end{center}
+				\end{figure}
+
+
+Moreover, for any two points $x_{1}$ and $x_{2}$ lying on the line $L$ described by $f(x)=0$,
+ \[
+ 	\beta^{T}(x_{1}-x_{2})=-\beta_{0}+\beta_{0}=0,
+ \]
+and thus $\beta^{*}=\beta/\norm{\beta}$ is unit normal vector to $L$. The signed, normal distance from any point $x\in \R^{2}$ to $L$ is $\frac{1}{\norm{\beta}}(\beta^{T}x+\beta_{0})$. 
+
+Suppose our feature set of $N$ points is given by $(x_{i},y_{i})$ where the class of $x_{i}\in\R^{2}$ is given by $y_{i}$ such that $y_{i}=1$ if $x_{i}$  is red and $y_{i}=-1$ if $x_{i}$ is green. This way, for any $i$, $y_{i}(\beta^{T}x_{i}+\beta_{0})$ is the positive distance from $x_{i}$ to $L$. We define the margin of the separating line to be the distance from $L$ to the closest point in $\set{x_{i}}$. 
+
+The maximal margin separating hyperplane by solving the program:
+\begin{align*}
+	\operatorname*{maximize}_{\beta,\beta_{0}, \norm{\beta}=1}\qquad & M \\
+	\text{subject to}\qquad & y_{i} (\beta^{T}x_{i}+\beta_{0})\geq M \\
+	&i=1,...,N.
+\end{align*}
+We can integrate the $\norm{\beta}=1$ constraint into inequality constraints as
+\[
+	\frac{1}{\norm{\beta}}y_{i} (\beta^{T}x_{i}+\beta_{0})\geq M 
+\]
+or 
+\[
+	y_{i} (\beta^{T}x_{i}+\beta_{0})\geq M \norm{\beta}.
+\]
+Note that for any $\beta, \beta_{0}$ satisfying the inequalities, any positive multiple also satisfies. Thus, we let $\norm{\beta}=1/M$ and give an equivalent program:
+\begin{align}
+	\label{eq:sephypplan}\operatorname*{maximize}_{\beta,\beta_{0}}\qquad & \frac{1}{2}\norm{\beta}^{2} \\
+	\text{subject to}\qquad & y_{i} (\beta^{T}x_{i}+\beta_{0})\geq 1 \nonumber\\
+	&i=1,...,N.\nonumber
+\end{align}
+
+Observe that the objective function in \eqref{eq:sephypplan} is quadratic and the inequality constraints are nonlinear; thus, the program is convex and can be easily solved. The separating hyperplane program for arbitrary dimensional data can be naively solved in Mathematica:
+
+\begin{lstlisting}
+SeparatingHyperplane[x_List, y_List] :=
+ Module[
+  {conditions, vars, b, w, ans,
+   dim = Length[x[[1]]] (* Dimension of training data *),
+   n = Length[x](* Size of training data *)},
+  vars = Table[w[i], {i, 1, dim}];
+  conditions = Join[
+    {Norm[vars]^2} (* Cost function *),
+    Table[y[[i]] (vars.x[[i]] + b) >= 1, {i, 1, n}] 
+    ];
+  ans = Minimize[conditions, Join[vars, {b}]];
+  ans = #[[2]] & /@ ans[[2]];
+  {ans[[1;;-2]], ans[[-1]]}
+  ]
+\end{lstlisting}
+
+The function \textbf{SeparatingHyperplane} returns $\set{\beta_{0}, \beta}$. The problem is more effectively solved with its Lagrangian dual, but we leave that development for the non-separable case below. 
+
+\subsection{Non-Separable Data} % (fold)
+\label{sub:non_separable_data}
+
+Any hyperplane of parameters $\beta$ ($\norm{\beta}=1$) and $\beta_{0}$ given by
+\[
+	\set{x \;|\; f(x)={\beta^{T}x+\beta_{0}}=0}	
+\]
+induces a binary classification rule given by
+\[
+	G(x)=\operatorname{sign}\bra{\beta^{T}x+\beta}. 
+\]
+
+We now consider a set $\set{\parens{x_{i},y_{i}}}$ of $N$ points where $x_{i}\in R^{n}$ where each $x_{i}$ is of class $y_{i}\in\set{-1,1}$. Unlike our previous example, this data may not be separable by a hyperplane. Nevertheless, we want to find a hyperplane that, in some sense, optimally classifies the data. The program given above cannot handle non-separable data, because misclassifications cause it to be unbounded. 
+
+To construct a new program, we permit misclassifications by introducing positive slack variables $\xi=(\xi_{1},\xi_{2},\ldots,\xi_{N})$ and change our constraint to
+\[
+	y_{i}(\beta^{T}x_{i}+\beta_{0})\geq M(1-\xi_{i}).
+\]
+
+Since we want to minimize the number of misclassifications, we penalize the cost function for misclassified test points. Our resulting program is
+\begin{align*}
+	\operatorname*{minimize}_{\beta,\beta_{0}}\qquad & \frac{1}{2}\norm{\beta}^{2} \\
+	\text{subject to}\qquad & 	y_{i}(\beta^{T}x_{i}+\beta_{0})\geq 1-\xi_{i} \\
+	&\xi_{i}\geq 0\\
+	&i=1,...,N
+\end{align*}
+for some penalizing constant $C$. This is again a convex problem. 
+
+\subsubsection{Dual Formulation} % (fold)
+\label{ssub:dual_formulation}
+
+We introduce Lagrange multipliers $\alpha_{i}, \mu_{1}$ (for $i=1,\ldots,N$) to give the Lagrangian 
+\[
+	\phi=
+		\frac{1}{2}\norm{\beta^{2}}
+		+C\sum_{i=1}^{N}\xi_{i}
+		-\sum_{i=1}^{N}\alpha_{i}
+			\bra{	y_{i}(\beta^{T}x_{i}+\beta_{0})-(1-\xi_{i})}
+		-\sum_{i=1}^{N}\mu_{i}\xi_{i}. 
+\]
+We compute the Lagrange dual by setting the gradient with respect to the primal variables equal to zero:
+\begin{align}
+	\beta&=\sum_{i=1}^{N}\alpha_{i}y_{i}x_{i} \label{eq:dual_con_3}\\
+	0&=\sum_{i=1}^{N}a_{i}y_{i} \label{eq:dual_con_1}\\
+	\alpha_{i}&=C-\mu_{i}, \;\forall\, i.\label{eq:dual_con_2}
+\end{align}
+
+
+Substituting this into $\phi$, we obtain the Lagrangian dual 
+\[
+	\phi(\alpha,\mu)=\sum_{i=1}^{N}\alpha_{i}-\frac{1}{2}\sum_{i=1}^{N}\sum_{j=1}^{N}\alpha_{i}\alpha_{j}y_{i}y_{j}x_{i}^{T}x_{j}.
+	\]
+Equations \eqref{eq:dual_con_1} and \eqref{eq:dual_con_2} give constraints for minimizing the dual function. Since $\mu_{i}\geq$, we minimize the dual subject to
+\eqref{eq:dual_con_1} and $0\leq a_{i}\leq C$. Because the primal problem is convex, the dual optimal value is also primal optimal. 
+
+At the global optimal solution, the KKT conditions guarantee the gradient of the Lagrangian being zero (equations \eqref{eq:dual_con_3}-\eqref{eq:dual_con_2}). Also, primal feasibility and complementary slackness:
+\begin{align}
+	y_{i}(x_{i}^{T}\beta+\beta_{0})+(1-\xi_{i})&\geq 0\\
+	\alpha_{i}\bra{y_{i}(x_{i})^{T}\beta+\beta_{0}-(1-\xi_{i})}&=0\label{eq:comp_slack_1}\\
+	\mu_{i}\xi_{i}&=0,
+\end{align}
+for $i = 1,\ldots, N$. 
+
+Note that the dual problem only requires the training data in the form of an inner product. This inner product can be replaced by generalized (Mercer) kernel functions which transform the data into other spaces without significant computational difficulty. The dual formulation even gives a closed formed solution for transforming the data into certain infinite dimensional spaces. Further discussion of kernel methods is outside the scope of this project.
+
+Given a optimal solution to the dual problem $\set{\hat{\alpha}_{i},\hat{\xi}_{i}}$, the primal solution is
+\[
+	\hat{\beta}=\sum_{i=1}^{N}\hat{\alpha}_{i}y_{i}x_{i},
+\]
+and $\beta_{0}$ is given by \eqref{eq:comp_slack_1} for any $i$ such that $\alpha_{i}= 0$.
+% subsubsection dual_formulation (end)
+% subsection non_separable_data (end)
+
+\subsection{Sequential Minimal Optimization Algorithm} % (fold)
+\label{sec:smo_algorithm}
+In 1998 John Platt of Microsoft Research published a paper  \cite{platt1998sequential} describing his Sequential Minimal Optimization Algorithm for solving the dual problem. The SMO algorithm is a variation on the more general stochastic gradient descent algorithm and is very fast for solving the SVM. 
+
+Because of the linear dependence given by \eqref{eq:dual_con_1}, the parameters $\alpha_{i}$ cannot be optimized independently as in stochastic gradient descent. Platt recognized that the linear dependence requires optimization of two parameters $\alpha_{i}$ and $\alpha_{j}$ together. 
+
+I have included a \textbf{Mathematica} implementation of Andrew Ng's Simplified SMO algorithm described in \cite{ng_smo}. The simplified SMO does not guarantee under every possible training set. However, except in pathological cases, it provides a satisfactory SVM. 
+
+In Figure \ref{fig:svm_plot_2d}, I used my algorithm to find the separating hyperplane for 25 red points sampled from $N((1,1),(1.5,1.5))$ and 25 green points from $N((-1,-1),(1.5,1.5))$. The data has significant overlap and is thus not linearly separable; 45 points are correctly classified, and 5 are misclassified. 
+
+\begin{figure}[htb]
+				\begin{center}
+				\includegraphics[width=300px]{Project/svm_plot_2d.pdf}
+				\caption{Non-separable data with linear separator}
+					\label{fig:svm_plot_2d}
+				\end{center}
+				\end{figure}
+
+My code generalizes to data in arbitrary dimension and arbitrary Mercer kernels. In figure \ref{fig:svm_plot_ker}, I used the polynomial kernel $K(x,x')=(1+\ang{x,x'})^{2}$ on the same data as \ref{fig:svm_plot_2d}; 47 points are correctly classified, and 3 are misclassified. Of course, kernel methods are prone to overfitting. 
+
+
+\begin{figure}[htb]
+				\begin{center}
+				\includegraphics[width=300px]{Project/svm_plot_ker.pdf}
+				\caption{Non-separable data with quadratic kernel}
+					\label{fig:svm_plot_ker}
+				\end{center}
+				\end{figure}
+% section smo_algorithm (end)
+
+
+\nocite{burges,platt1998sequential,ng,ng_smo}
+\bibliographystyle{plain}
+\bibliography{OR706Project}
+
+
+\end{document}
+
