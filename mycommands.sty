@@ -1,0 +1,131 @@
+\usepackage{amsmath,amssymb, amsfonts, amsthm} 
+\usepackage{setspace, framed, pdfsync,tocloft} 
+\usepackage[colorinlistoftodos, textwidth=4cm, shadow]{todonotes} 
+\usepackage{color} \onehalfspacing
+
+\newcommand{\unfinished}{
+	\begin{MyBox}
+		\listoftodos
+	\end{MyBox}\pagecolor{mydarkgray}\color{mylightgray}}
+
+%Superscript Text
+\newcommand{\superscript}[1]{\ensuremath{^{\textrm{#1}}} } 
+\newcommand{\subscript}[1]{\ensuremath{_{\textrm{#1}}} }
+
+\newcommand{\supth}[0]{\superscript{th}} 
+\newcommand{\st}[0]{\superscript{st}} 
+\newcommand{\nd}[0]{\superscript{nd}}  
+\newcommand{\rd}[0]{\superscript{rd}}
+
+%Brackets%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\set}[1]{\left\{#1\right\}} 
+\newcommand{\parens}[1]{\left(#1\right)} 
+\newcommand{\bigparens}[1]{\bigl(#1\bigr)} 
+\newcommand{\ang}[1]{\left\langle#1\right\rangle} 
+\newcommand{\floor}[1]{\left\lfloor#1\right\rfloor} 
+\newcommand{\bra}[1]{\left[#1\right]} 
+\newcommand{\bigbra}[1]{\bigl[#1\bigr]} 
+\newcommand{\psbra}[1]{\bra{\bra{#1}}} 
+\newcommand{\abs}[1]{\left|#1\right|} 
+\newcommand{\bigabs}[1]{\bigl|#1\bigr|} 
+\newcommand{\biggerabs}[1]{\Bigl|#1\Bigr|} 
+\newcommand{\Bigabs}[1]{\biggl|#1\biggr|} 
+\newcommand{\Biggerabs}[1]{\Biggl|#1\Biggr|} 
+\newcommand{\norm}[1]{\left\|#1\right\|} 
+\newcommand{\onen}[1]{\norm{#1}_{1}} 
+\newcommand{\twon}[1]{\norm{#1}_{2}} 
+\newcommand{\infn}[1]{\norm{#1}_{\infty}} 
+\newcommand{\pn}[1]{\norm{#1}_{p}} 
+\newcommand{\cvec}[2]{\left[ 
+\begin{matrix}
+	#1 \\
+	#2 
+\end{matrix}
+\right]}
+
+%Common Commands
+\newcommand{\normal}{\vartriangleleft} 
+\newcommand{\E}{\text{E}} 
+\newcommand{\Var}{\text{Var}} 
+\newcommand{\Cov}{\text{Cov}} 
+\newcommand{\VarX}{\Var\;X} 
+\newcommand{\VarY}{\Var\;Y} 
+\newcommand{\EX}{\E X} 
+\newcommand{\EY}{\E Y} 
+\newcommand{\dx}{\;dx} 
+\newcommand{\dt}{\;dt} 
+\newcommand{\dy}{\;dy} 
+\newcommand{\res}[1]{\text{ res}\parens{#1}} 
+\newcommand{\g}{\,|\,} 
+
+%Given, for probabilities
+\newcommand{\vf}{
+\vfill} 
+\newcommand{\ds}{\displaystyle} 
+\newcommand{\ra}{\rightarrow} 
+\newcommand{\n}{\text{n}} 
+\newcommand{\F}{\mathbb{F}} 
+\newcommand{\N}{\mathbb{N}} 
+\newcommand{\D}{\mathbb{D}} 
+\newcommand{\Z}{\mathbb{Z}} 
+\newcommand{\Q}{\mathbb{Q}} 
+\newcommand{\R}{\mathbb{R}} 
+\newcommand{\C}{\mathbb{C}} 
+\newcommand{\cn}{\mathbb{C}^n} 
+\newcommand{\dollarsign}{\$} 
+\newcommand{\real}{\text{\textbf{\,Re\,}}} 
+\newcommand{\imag}{\text{\textbf{\,Im\,}}} 
+\newcommand{\Arg}{\text{Arg\;}} 
+\newcommand{\Gal}{\text{Gal}} 
+\newcommand{\ann}{\text{ann}} 
+\newcommand{\pd}[2]{\frac{
+\partial#1}{
+\partial#2}} 
+\newcommand{\zg}[2]{\bra{#2}_{#1}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\def\imod#1{\allowbreak\mkern10mu({\operator@font mod}\,\,#1)} 
+\newcommand{\fini}{\hfill \mbox{
+\raggedright $\Box$}} 
+\newcommand{\finimath}[1]{
+\newline
+\newline \mbox{} \hfill $\displaystyle #1$ \hfill \mbox{
+\raggedright $\Box$}}
+
+%Colors
+\definecolor{mydarkgray}{rgb}{.074,.074,.074} 
+\definecolor{mylightgray}{rgb}{.54,.54,.54} 
+\definecolor{mygray}{rgb}{.9,.9,.9} 
+\definecolor{gray2}{rgb}{.5,.5,.5} 
+\definecolor{black}{rgb}{0,0,0} 
+\definecolor{myyellow}{RGB}{193,193,68}
+
+%Todo
+\newcommand{\ptodo}[2]{\todo[inline,color=myyellow]{{\color{black}\textbf{Problem #1:} #2}}}
+
+%Boxes
+\newenvironment{HWBox}{
+{\begin{HWBox}\begin{MyBox}}
+{\end{HWBox}\end{MyBox}}
+}
+
+\newenvironment{MyBox}[1][mylightgray]{ 
+\def\FrameCommand{\fboxsep=\FrameSep \fboxrule=\FrameRule \fcolorbox{black}{#1}
+}
+
+\MakeFramed
+{
+	\setlength{\textwidth}{\textwidth} 
+	\addtolength{\textwidth}{-3\FrameSep}
+	\addtolength{\textwidth}{-3\FrameRule}
+	\setlength{\hsize}{\textwidth} 
+	\FrameRestore}
+}
+{\endMakeFramed}
+
+\newcommand{\Question}[2]{
+\begin{MyBox}
+\noindent {\large \textbf{\color{black}\sf Problem #1}} 
+\noindent {\color{black}\small  #2} \nopagebreak 
+\end{MyBox}
+} 
