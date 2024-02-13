@@ -17,7 +17,7 @@ jobs:
             # uses: dante-ev/latex-action@49cf7cb5f79e7b2006dbdffea85e02bec0b6244b
             uses: dante-ev/latex-action@2021-A
             with:
-              root_file: "OR706 Support Vector Machines.tex"
+              root_file: "svm.tex"
               # compiler: # optional, default is latexmk
               # args: # optional, default is -pdf -latexoption=-file-line-error -latexoption=-interaction=nonstopmode
               # extra_system_packages: # optional
